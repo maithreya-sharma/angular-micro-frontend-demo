@@ -1,0 +1,86 @@
+name: CI
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # The site is served from https://<owner>.github.io/<repo>/
+  BASE_PATH: /${{ github.event.repository.name }}/
+
+jobs:
+  verify:
+    name: Unit tests and build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Unit tests (Jasmine + Karma, headless Chrome)
+        run: .github/scripts/run-and-annotate.sh "Unit tests" npm run test:ci
+      - name: Production build
+        if: ${{ !cancelled() }}
+        run: .github/scripts/run-and-annotate.sh "Build" npx ng build --base-href "$BASE_PATH"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: site
+          path: dist/formloom/browser
+          retention-days: 3
+
+  e2e:
+    name: End-to-end test (Playwright)
+    needs: verify
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - uses: actions/download-artifact@v4
+        with:
+          name: site
+          path: _site${{ env.BASE_PATH }}
+      - name: Install Playwright (Chromium)
+        run: |
+          npm install --no-save playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Serve the build like GitHub Pages and run the test
+        run: |
+          cp "_site${BASE_PATH}index.html" "_site${BASE_PATH}404.html"
+          node e2e/serve.mjs _site "${BASE_PATH%/}" 8080 &
+          sleep 2
+          .github/scripts/run-and-annotate.sh "E2E" node e2e/smoke.mjs "http://localhost:8080${BASE_PATH%/}"
+
+  deploy:
+    name: Deploy to GitHub Pages
+    needs: e2e
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: site
+          path: site
+      - name: Add SPA fallback for deep links
+        run: cp site/index.html site/404.html && touch site/.nojekyll
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: site
+      - id: deployment
+        uses: actions/deploy-pages@v4
