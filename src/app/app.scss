@@ -1,0 +1,125 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 10px 18px;
+  background: var(--paper);
+  border-bottom: 1px solid var(--rule);
+  flex-wrap: wrap;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--ink);
+  text-decoration: none;
+}
+.brand__mark {
+  width: 26px;
+  height: 26px;
+  fill: none;
+  stroke-linecap: round;
+  .warp { stroke: var(--ink); stroke-width: 2.2; }
+  .weft { stroke: var(--thread); stroke-width: 3; }
+}
+.brand__name {
+  font-weight: 600;
+  font-size: 1.05rem;
+  letter-spacing: -0.01em;
+}
+
+.title {
+  flex: 0 1 280px;
+  min-width: 140px;
+}
+.title__input {
+  width: 100%;
+  padding: 4px 8px;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-weight: 500;
+  &:hover { border-color: var(--rule); }
+  &:focus { outline: none; border-color: var(--ink); background: var(--paper); }
+}
+
+.tabs {
+  display: flex;
+  gap: 2px;
+  padding: 3px;
+  border-radius: 8px;
+  background: var(--paper-2);
+}
+.tabs__link {
+  padding: 5px 14px;
+  border-radius: 6px;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  font-weight: 500;
+  text-decoration: none;
+  &:hover { color: var(--ink); }
+  &.is-active { background: var(--paper); color: var(--ink); box-shadow: 0 1px 2px rgb(20 28 79 / 12%); }
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+}
+.templates {
+  width: auto;
+  min-height: 34px;
+  padding: 4px 8px;
+  font-size: 0.9rem;
+}
+
+.main {
+  flex: 1;
+  min-height: 0;
+}
+
+.toasts {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 100;
+}
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: 380px;
+  padding: 8px 8px 8px 14px;
+  border-radius: 8px;
+  background: var(--ink-strong);
+  color: #fff;
+  box-shadow: var(--shadow-lift);
+  font-size: 0.88rem;
+  animation: toast-in 160ms ease-out;
+  .btn { color: inherit; }
+}
+.toast--success { border-left: 4px solid var(--ok); }
+.toast--error { border-left: 4px solid var(--danger); }
+
+@keyframes toast-in {
+  from { transform: translateY(8px); opacity: 0; }
+}
+
+@media (max-width: 860px) {
+  .topbar { gap: 10px; }
+  .title { order: 3; flex-basis: 100%; }
+  .actions { margin-left: 0; flex-wrap: wrap; }
+}

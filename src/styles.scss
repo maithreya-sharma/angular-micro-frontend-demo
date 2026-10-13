@@ -1,0 +1,230 @@
+// Formloom design tokens and global styles.
+// Concept: a loom. The canvas shows faint vertical warp threads, and the
+// selected field is marked with a saffron "thread" stitched down its edge.
+
+:root {
+  --cotton: #eceff4; // app background
+  --paper: #ffffff; // panels, cards
+  --paper-2: #f5f7fa; // subtle fills
+  --rule: #d6dbe4; // borders
+  --ink: #1f2a6b; // primary: indigo dye
+  --ink-strong: #141c4f;
+  --ink-soft: #e4e7f6;
+  --thread: #e39b2d; // accent: saffron thread
+  --thread-soft: #fdf1dc;
+  --text: #232836;
+  --text-muted: #5f6878;
+  --danger: #b93a26;
+  --danger-soft: #fbe9e5;
+  --ok: #2b7a57;
+  --ok-soft: #e3f3ea;
+  --warn: #8a5a00;
+  --warn-soft: #fff3d6;
+
+  --font: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --mono: 'IBM Plex Mono', ui-monospace, Menlo, Consolas, monospace;
+  --radius: 6px;
+  --shadow-lift: 0 10px 28px rgb(20 28 79 / 18%);
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --cotton: #121522;
+    --paper: #1a1e2e;
+    --paper-2: #212638;
+    --rule: #303750;
+    --ink: #9fadff;
+    --ink-strong: #c3ccff;
+    --ink-soft: #262d4d;
+    --thread: #f0b24f;
+    --thread-soft: #3a2c14;
+    --text: #e3e6f0;
+    --text-muted: #9aa2b8;
+    --danger: #ff8a73;
+    --danger-soft: #3b1d18;
+    --ok: #63d19b;
+    --ok-soft: #14301f;
+    --warn: #f3c056;
+    --warn-soft: #362a10;
+    --shadow-lift: 0 10px 28px rgb(0 0 0 / 45%);
+    color-scheme: dark;
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  background: var(--cotton);
+  color: var(--text);
+  font: 15px/1.5 var(--font);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3 {
+  margin: 0;
+  line-height: 1.25;
+  font-weight: 600;
+}
+h1 { font-size: 1.35rem; }
+h2 { font-size: 1.05rem; }
+h3 { font-size: 0.92rem; }
+p { margin: 0; }
+
+a { color: var(--ink); }
+code,
+.key { font-family: var(--mono); font-size: 0.82em; }
+
+[hidden] { display: none !important; }
+.muted { color: var(--text-muted); }
+.small { font-size: 0.85rem; }
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+:focus-visible {
+  outline: 2px solid var(--thread);
+  outline-offset: 2px;
+}
+
+// ---- Buttons ---------------------------------------------------------------
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 34px;
+  padding: 0 12px;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background: var(--paper);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  white-space: nowrap;
+  &:hover:not(:disabled) { border-color: var(--ink); color: var(--ink); }
+  &:disabled { opacity: 0.45; cursor: not-allowed; }
+}
+.btn--primary {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--paper);
+  &:hover:not(:disabled) { background: var(--ink-strong); color: var(--paper); }
+}
+.btn--quiet { border-color: transparent; background: transparent; }
+.btn--danger:hover:not(:disabled) { border-color: var(--danger); color: var(--danger); }
+.btn--icon { width: 34px; padding: 0; }
+.btn--sm { min-height: 28px; padding: 0 8px; font-size: 0.82rem; }
+.btn--sm.btn--icon { width: 28px; }
+
+// ---- Form controls (used by both the inspector and the rendered form) ------
+.control {
+  width: 100%;
+  min-height: 36px;
+  padding: 6px 10px;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background: var(--paper);
+  color: var(--text);
+  font: inherit;
+  &:focus { outline: none; border-color: var(--ink); box-shadow: 0 0 0 3px var(--ink-soft); }
+}
+textarea.control { min-height: 84px; resize: vertical; }
+select.control { cursor: pointer; }
+.control.is-invalid,
+.ng-touched.ng-invalid.control { border-color: var(--danger); }
+
+.label {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 0.86rem;
+  font-weight: 600;
+}
+.help { margin-top: 4px; font-size: 0.8rem; color: var(--text-muted); }
+.error { margin-top: 4px; font-size: 0.8rem; color: var(--danger); }
+
+.check {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 8px;
+  cursor: pointer;
+  input { margin-top: 3px; accent-color: var(--ink); width: 16px; height: 16px; }
+}
+
+// ---- Misc ------------------------------------------------------------------
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: var(--paper-2);
+  color: var(--text-muted);
+}
+.pill--error { background: var(--danger-soft); color: var(--danger); }
+.pill--warn { background: var(--warn-soft); color: var(--warn); }
+.pill--ok { background: var(--ok-soft); color: var(--ok); }
+.pill--thread { background: var(--thread-soft); color: var(--warn); }
+
+.panel {
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+}
+
+.issue-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  li {
+    display: flex;
+    gap: 8px;
+    align-items: baseline;
+    font-size: 0.85rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+// CDK drag-and-drop: the preview follows the pointer; the placeholder shows the drop slot.
+.cdk-drag-preview {
+  box-shadow: var(--shadow-lift);
+  border-radius: var(--radius);
+  opacity: 0.96;
+}
+.cdk-drag-placeholder {
+  opacity: 0.35;
+}
+.cdk-drag-animating,
+.cdk-drop-list-dragging .cdk-drag:not(.cdk-drag-placeholder) {
+  transition: transform 180ms cubic-bezier(0, 0, 0.2, 1);
+}

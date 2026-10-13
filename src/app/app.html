@@ -1,0 +1,60 @@
+<header class="topbar">
+  <a class="brand" routerLink="/design" aria-label="Formloom home">
+    <svg class="brand__mark" viewBox="0 0 28 28" aria-hidden="true">
+      <path d="M7 3v22M14 3v22M21 3v22" class="warp" />
+      <path d="M4 10h7M17 10h7M10 18h8" class="weft" />
+    </svg>
+    <span class="brand__name">Formloom</span>
+  </a>
+
+  <label class="title">
+    <span class="sr-only">Form title</span>
+    <input
+      class="title__input"
+      [value]="store.schema().title"
+      (input)="rename($any($event.target).value)"
+      spellcheck="false"
+    />
+  </label>
+
+  <nav class="tabs" aria-label="Views">
+    @for (tab of tabs; track tab.path) {
+      <a class="tabs__link" [routerLink]="tab.path" routerLinkActive="is-active" ariaCurrentWhenActive="page">{{
+        tab.label
+      }}</a>
+    }
+  </nav>
+
+  <div class="actions">
+    <span [class]="'pill pill--' + issueSummary().tone" data-testid="issue-summary">
+      {{ issueSummary().text }}
+    </span>
+    <button type="button" class="btn btn--quiet btn--icon" (click)="store.undo()" [disabled]="!store.canUndo()" title="Undo (Ctrl+Z)" aria-label="Undo">
+      ↶
+    </button>
+    <button type="button" class="btn btn--quiet btn--icon" (click)="store.redo()" [disabled]="!store.canRedo()" title="Redo (Ctrl+Shift+Z)" aria-label="Redo">
+      ↷
+    </button>
+    <label class="sr-only" for="template-picker">Start from a template</label>
+    <select id="template-picker" class="control templates" (change)="useTemplate($any($event.target))">
+      <option value="">Templates…</option>
+      @for (t of templates; track t.id) {
+        <option [value]="t.id">{{ t.name }}</option>
+      }
+    </select>
+    <button type="button" class="btn btn--primary" (click)="share()">Copy share link</button>
+  </div>
+</header>
+
+<main class="main">
+  <router-outlet />
+</main>
+
+<div class="toasts" aria-live="polite">
+  @for (toast of toasts.toasts(); track toast.id) {
+    <div [class]="'toast toast--' + toast.tone" role="status">
+      <span>{{ toast.message }}</span>
+      <button type="button" class="btn btn--quiet btn--sm btn--icon" (click)="toasts.dismiss(toast.id)" aria-label="Dismiss">✕</button>
+    </div>
+  }
+</div>
