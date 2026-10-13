@@ -1,0 +1,44 @@
+@let s = store.schema();
+<div class="layout">
+  <section class="stage" [class.stage--phone]="device() === 'phone'">
+    <div class="toolbar">
+      <span class="muted small">This is the real form, running on Angular Reactive Forms.</span>
+      <div class="switch" role="group" aria-label="Preview width">
+        <button type="button" class="btn btn--sm" [class.on]="device() === 'desktop'" (click)="device.set('desktop')" [attr.aria-pressed]="device() === 'desktop'">
+          Desktop
+        </button>
+        <button type="button" class="btn btn--sm" [class.on]="device() === 'phone'" (click)="device.set('phone')" [attr.aria-pressed]="device() === 'phone'">
+          Phone
+        </button>
+      </div>
+    </div>
+
+    @if (store.errorCount()) {
+      <p class="notice">
+        This form has {{ store.errorCount() }} unresolved {{ store.errorCount() === 1 ? 'problem' : 'problems' }}, so some fields may not
+        behave as intended. <a routerLink="/design">Fix in Design</a>
+      </p>
+    }
+
+    <article class="sheet">
+      <header class="sheet__head">
+        <h1>{{ s.title || 'Untitled form' }}</h1>
+        @if (s.description) {
+          <p class="muted">{{ s.description }}</p>
+        }
+      </header>
+      <fl-form-renderer #renderer [schema]="s" [narrow]="device() === 'phone'" (submitted)="result.set($event)" />
+    </article>
+  </section>
+
+  <aside class="output" aria-label="Submitted data">
+    <h2>Submitted data</h2>
+    @if (result(); as value) {
+      <p class="muted small">Only visible fields are included. Hidden fields are disabled, so they never reach your API.</p>
+      <pre class="json" data-testid="result">{{ value | json }}</pre>
+      <button type="button" class="btn btn--sm" (click)="result.set(null); renderer.reset()">Fill in again</button>
+    } @else {
+      <p class="muted small">Submit the form to see the exact JSON your backend would receive.</p>
+    }
+  </aside>
+</div>

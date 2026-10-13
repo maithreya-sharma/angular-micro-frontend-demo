@@ -1,0 +1,92 @@
+@let s = schema();
+<form class="form" [formGroup]="form()" (ngSubmit)="submit()" novalidate>
+  @if (attempted() && invalidCount()) {
+    <p class="summary" role="alert" data-testid="error-summary">
+      {{ invalidCount() === 1 ? '1 field needs' : invalidCount() + ' fields need' }} attention before you can submit.
+    </p>
+  }
+
+  <div class="grid">
+    @for (field of s.fields; track field.id) {
+      @if (visible().has(field.id)) {
+        <div class="field" [class.field--half]="field.width === 'half'" [attr.data-key]="field.key">
+          @switch (field.type) {
+            @case ('checkbox') {
+              <label class="check">
+                <input type="checkbox" [id]="id(field)" [formControlName]="field.key" />
+                <span>
+                  {{ field.label }}
+                  @if (field.validation.required) {
+                    <span class="req" aria-hidden="true">*</span>
+                  }
+                </span>
+              </label>
+            }
+            @case ('radio') {
+              <fieldset class="choices" [attr.aria-describedby]="id(field) + '-help'">
+                <legend class="label">
+                  {{ field.label }}
+                  @if (field.validation.required) {
+                    <span class="req" aria-hidden="true">*</span>
+                  }
+                </legend>
+                @for (o of field.options; track $index) {
+                  <label class="check">
+                    <input type="radio" [name]="field.key" [formControlName]="field.key" [value]="o.value" />
+                    <span>{{ o.label }}</span>
+                  </label>
+                }
+              </fieldset>
+            }
+            @default {
+              <label class="label" [for]="id(field)">
+                {{ field.label }}
+                @if (field.validation.required) {
+                  <span class="req" aria-hidden="true">*</span>
+                }
+              </label>
+              @switch (field.type) {
+                @case ('textarea') {
+                  <textarea class="control" [id]="id(field)" [formControlName]="field.key" [placeholder]="field.placeholder"></textarea>
+                }
+                @case ('select') {
+                  <select class="control" [id]="id(field)" [formControlName]="field.key">
+                    <option value="">Choose…</option>
+                    @for (o of field.options; track $index) {
+                      <option [value]="o.value">{{ o.label }}</option>
+                    }
+                  </select>
+                }
+                @case ('number') {
+                  <input class="control" type="number" [id]="id(field)" [formControlName]="field.key" [placeholder]="field.placeholder" />
+                }
+                @case ('email') {
+                  <input class="control" type="email" [id]="id(field)" [formControlName]="field.key" [placeholder]="field.placeholder" autocomplete="email" />
+                }
+                @case ('date') {
+                  <input class="control" type="date" [id]="id(field)" [formControlName]="field.key" />
+                }
+                @default {
+                  <input class="control" type="text" [id]="id(field)" [formControlName]="field.key" [placeholder]="field.placeholder" />
+                }
+              }
+            }
+          }
+          @if (field.helpText) {
+            <p class="help" [id]="id(field) + '-help'">{{ field.helpText }}</p>
+          }
+          @if (error(field); as message) {
+            <p class="error" role="alert">{{ message }}</p>
+          }
+        </div>
+      }
+    } @empty {
+      <p class="muted">Add fields in the Design view to see them here.</p>
+    }
+  </div>
+
+  <div class="actions">
+    <button type="submit" class="btn btn--primary" data-testid="submit">{{ s.submitLabel || 'Submit' }}</button>
+    <button type="button" class="btn btn--quiet" (click)="reset()">Clear form</button>
+  </div>
+</form>

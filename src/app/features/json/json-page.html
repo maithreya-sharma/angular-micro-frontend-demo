@@ -1,0 +1,51 @@
+<div class="layout">
+  <section class="pane">
+    <div class="pane__head">
+      <div>
+        <h2>Schema</h2>
+        <p class="muted small">{{ fieldCount() }} fields. Feed this JSON to any app that renders Formloom schemas.</p>
+      </div>
+      <div class="row">
+        <button type="button" class="btn btn--sm" (click)="copy()">Copy</button>
+        <button type="button" class="btn btn--sm" (click)="download()">Download .json</button>
+      </div>
+    </div>
+    <pre class="code" data-testid="schema-json">{{ json() }}</pre>
+  </section>
+
+  <section class="pane pane--import">
+    <div class="pane__head">
+      <div>
+        <h2>Import</h2>
+        <p class="muted small">Paste a schema or open a .json file. It replaces the current form, and you can undo it.</p>
+      </div>
+    </div>
+    <label class="sr-only" for="import-json">Schema JSON to import</label>
+    <textarea
+      id="import-json"
+      class="control code-input"
+      [class.is-invalid]="importErrors().length"
+      [value]="draft()"
+      (input)="draft.set($any($event.target).value)"
+      placeholder='{ "title": "My form", "fields": [ … ] }'
+      spellcheck="false"
+      data-testid="import-input"
+    ></textarea>
+
+    @if (importErrors().length) {
+      <ul class="errors" role="alert" data-testid="import-errors">
+        @for (e of importErrors(); track $index) {
+          <li>{{ e }}</li>
+        }
+      </ul>
+    }
+
+    <div class="row">
+      <button type="button" class="btn btn--primary" (click)="importDraft()" [disabled]="!draft().trim()">Import JSON</button>
+      <label class="btn">
+        Open file…
+        <input type="file" accept="application/json,.json" class="sr-only" (change)="readFile($any($event.target))" />
+      </label>
+    </div>
+  </section>
+</div>

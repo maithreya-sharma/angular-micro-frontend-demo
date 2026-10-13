@@ -1,0 +1,55 @@
+:host {
+  display: block;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px 16px;
+}
+.field {
+  grid-column: 1 / -1;
+  min-width: 0;
+  animation: reveal 160ms ease-out;
+}
+.field--half { grid-column: span 1; }
+
+:host(.is-narrow) .grid { grid-template-columns: 1fr; }
+:host(.is-narrow) .field--half { grid-column: 1 / -1; }
+
+.req { color: var(--danger); margin-left: 2px; }
+
+.choices {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  legend { padding: 0; }
+}
+
+.summary {
+  margin-bottom: 18px;
+  padding: 10px 12px;
+  border-radius: var(--radius);
+  background: var(--danger-soft);
+  color: var(--danger);
+  font-size: 0.9rem;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 24px;
+}
+
+// Conditional fields announce themselves when they appear.
+@keyframes reveal {
+  from { opacity: 0; transform: translateY(-4px); }
+}
+
+@media (max-width: 600px) {
+  .grid { grid-template-columns: 1fr; }
+  .field--half { grid-column: 1 / -1; }
+}
