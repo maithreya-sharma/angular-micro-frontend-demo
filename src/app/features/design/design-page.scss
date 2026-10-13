@@ -1,0 +1,133 @@
+:host {
+  display: block;
+  height: 100%;
+}
+
+.workspace {
+  display: grid;
+  grid-template-columns: 236px minmax(0, 1fr) 340px;
+  height: 100%;
+}
+
+.palette,
+.inspector-pane {
+  overflow-y: auto;
+  background: var(--paper);
+}
+.palette {
+  padding: 16px 12px;
+  border-right: 1px solid var(--rule);
+  h2 { margin-bottom: 4px; }
+}
+.inspector-pane { border-left: 1px solid var(--rule); }
+
+.palette__list {
+  list-style: none;
+  margin: 14px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.palette__item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 8px;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background: var(--paper);
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: grab;
+  &:hover { border-color: var(--ink); }
+}
+.palette__item--ghost { opacity: 0.5; }
+.palette__glyph {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 30px;
+  height: 30px;
+  border-radius: 5px;
+  background: var(--ink-soft);
+  color: var(--ink);
+  font-weight: 600;
+}
+.palette__label { display: block; font-size: 0.88rem; font-weight: 500; }
+.palette__hint { display: block; font-size: 0.75rem; color: var(--text-muted); }
+
+// The loom: faint vertical warp threads behind the sheet.
+.canvas {
+  overflow-y: auto;
+  padding: 32px 24px 64px;
+  background-color: var(--cotton);
+  background-image: repeating-linear-gradient(
+    90deg,
+    transparent 0 23px,
+    color-mix(in srgb, var(--ink) 7%, transparent) 23px 24px
+  );
+}
+
+.sheet {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 28px 28px 24px;
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+}
+.sheet__head {
+  padding-bottom: 18px;
+  margin-bottom: 18px;
+  border-bottom: 1px solid var(--rule);
+  p { margin-top: 4px; }
+}
+.sheet__fields {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 120px;
+}
+.sheet__submit {
+  margin-top: 20px;
+  pointer-events: none;
+}
+
+.drag-handle {
+  cursor: grab;
+  color: var(--text-muted);
+  font-size: 1.05rem;
+  line-height: 1;
+  padding: 2px 4px;
+}
+
+.empty {
+  padding: 36px 16px;
+  border: 1.5px dashed var(--rule);
+  border-radius: var(--radius);
+  text-align: center;
+}
+
+@media (max-width: 1100px) {
+  .workspace { grid-template-columns: 200px minmax(0, 1fr) 300px; }
+}
+
+@media (max-width: 860px) {
+  .workspace {
+    grid-template-columns: 1fr;
+    height: auto;
+  }
+  .palette { border-right: 0; border-bottom: 1px solid var(--rule); }
+  .palette__list { flex-direction: row; overflow-x: auto; }
+  .palette__item { width: max-content; }
+  .palette__hint { display: none; }
+  .canvas { padding: 16px; }
+  .sheet { padding: 18px; }
+  .inspector-pane { border-left: 0; border-top: 1px solid var(--rule); }
+}

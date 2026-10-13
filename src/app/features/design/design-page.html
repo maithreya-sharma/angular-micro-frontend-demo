@@ -1,0 +1,82 @@
+<div class="workspace" cdkDropListGroup>
+  <aside class="palette" aria-label="Field types">
+    <h2>Fields</h2>
+    <p class="muted small">Drag onto the canvas, or click to add below the selected field.</p>
+    <ul
+      class="palette__list"
+      cdkDropList
+      cdkDropListSortingDisabled
+      [cdkDropListEnterPredicate]="noDrop"
+      [cdkDropListData]="palette"
+    >
+      @for (item of palette; track item.type) {
+        <li cdkDrag [cdkDragData]="item.type">
+          <button type="button" class="palette__item" (click)="store.addField(item.type)" [attr.data-testid]="'add-' + item.type">
+            <span class="palette__glyph" aria-hidden="true">{{ item.glyph }}</span>
+            <span>
+              <span class="palette__label">{{ item.label }}</span>
+              <span class="palette__hint">{{ item.hint }}</span>
+            </span>
+          </button>
+          <div *cdkDragPlaceholder class="palette__item palette__item--ghost">
+            <span class="palette__glyph" aria-hidden="true">{{ item.glyph }}</span>
+            <span class="palette__label">{{ item.label }}</span>
+          </div>
+        </li>
+      }
+    </ul>
+  </aside>
+
+  <section class="canvas" aria-label="Form canvas" (click)="store.select(null)">
+    <div class="sheet">
+      <header class="sheet__head">
+        <h1>{{ store.schema().title || 'Untitled form' }}</h1>
+        @if (store.schema().description) {
+          <p class="muted">{{ store.schema().description }}</p>
+        }
+      </header>
+
+      <ol
+        class="sheet__fields"
+        cdkDropList
+        [cdkDropListData]="store.fields()"
+        (cdkDropListDropped)="drop($event)"
+        aria-label="Fields in this form"
+      >
+        @for (field of store.fields(); track field.id; let i = $index, first = $first, last = $last) {
+          <li cdkDrag [cdkDragData]="field" class="sheet__item">
+            <fl-field-card
+              [field]="field"
+              [selected]="field.id === store.selectedId()"
+              [issues]="issuesByField().get(field.id)"
+              [source]="field.visibleWhen ? fieldsById().get(field.visibleWhen.fieldId) : undefined"
+              [canMoveUp]="!first"
+              [canMoveDown]="!last"
+              (selectField)="store.select(field.id)"
+              (moveUp)="move(i, -1)"
+              (moveDown)="move(i, 1)"
+              (duplicate)="store.duplicateField(field.id)"
+              (remove)="store.removeField(field.id)"
+              (click)="$event.stopPropagation()"
+            >
+              <span cdkDragHandle class="drag-handle" title="Drag to reorder" aria-hidden="true">⠿</span>
+            </fl-field-card>
+          </li>
+        } @empty {
+          <li class="empty">
+            <p><strong>This form is empty.</strong></p>
+            <p class="muted">Drag a field here from the left, or pick a template from the top bar.</p>
+          </li>
+        }
+      </ol>
+
+      <div class="sheet__submit">
+        <span class="btn btn--primary" aria-hidden="true">{{ store.schema().submitLabel }}</span>
+      </div>
+    </div>
+  </section>
+
+  <aside class="inspector-pane" aria-label="Properties">
+    <fl-inspector />
+  </aside>
+</div>

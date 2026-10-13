@@ -1,0 +1,80 @@
+@let f = field();
+<article
+  class="card"
+  tabindex="0"
+  role="button"
+  [attr.aria-pressed]="selected()"
+  [attr.aria-label]="'Edit field ' + (f.label || f.key)"
+  (click)="selectField.emit()"
+  (keydown.enter)="selectField.emit()"
+  (keydown.space)="$event.preventDefault(); selectField.emit()"
+  data-testid="field-card"
+>
+  <div class="card__top">
+    <ng-content />
+    <span class="card__label">
+      {{ f.label || 'Untitled field' }}
+      @if (f.validation.required) {
+        <span class="required" aria-label="required">*</span>
+      }
+    </span>
+    <span class="card__flags">
+      @if (issues()?.errors) {
+        <span class="pill pill--error">{{ issues()!.errors }} {{ issues()!.errors === 1 ? 'problem' : 'problems' }}</span>
+      } @else if (issues()?.warnings) {
+        <span class="pill pill--warn">Check</span>
+      }
+      @if (f.width === 'half') {
+        <span class="pill">Half width</span>
+      }
+      <span class="pill">{{ meta().label }}</span>
+    </span>
+  </div>
+
+  <div class="card__sketch" aria-hidden="true">
+    @switch (f.type) {
+      @case ('textarea') {
+        <div class="sketch sketch--area">{{ f.placeholder }}</div>
+      }
+      @case ('checkbox') {
+        <div class="sketch-check">
+          <span class="box" [class.on]="f.defaultValue === true"></span>{{ f.defaultValue === true ? 'Ticked by default' : 'Unticked by default' }}
+        </div>
+      }
+      @case ('radio') {
+        <div class="sketch-options">
+          @for (o of f.options; track $index) {
+            <span><span class="dot"></span>{{ o.label }}</span>
+          }
+        </div>
+      }
+      @case ('select') {
+        <div class="sketch">{{ f.options[0]?.label ?? 'Choose…' }} <span class="chev">▾</span></div>
+      }
+      @default {
+        <div class="sketch">{{ f.placeholder || (f.type === 'date' ? 'dd / mm / yyyy' : '') }}</div>
+      }
+    }
+  </div>
+
+  @if (f.helpText) {
+    <p class="help">{{ f.helpText }}</p>
+  }
+
+  <div class="card__meta">
+    <code class="key" title="Key in submitted data">{{ f.key }}</code>
+    @for (c of constraints(); track c) {
+      <span class="muted small">{{ c }}</span>
+    }
+    @if (ruleText(); as text) {
+      <span class="rule">{{ text }}</span>
+    }
+  </div>
+
+  <div class="card__tools" (click)="$event.stopPropagation()">
+    <button type="button" class="btn btn--quiet btn--sm btn--icon" (click)="moveUp.emit()" [disabled]="!canMoveUp()" aria-label="Move up" title="Move up">↑</button>
+    <button type="button" class="btn btn--quiet btn--sm btn--icon" (click)="moveDown.emit()" [disabled]="!canMoveDown()" aria-label="Move down" title="Move down">↓</button>
+    <button type="button" class="btn btn--quiet btn--sm" (click)="duplicate.emit()">Duplicate</button>
+    <button type="button" class="btn btn--quiet btn--sm btn--danger" (click)="remove.emit()">Delete</button>
+  </div>
+</article>

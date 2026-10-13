@@ -1,0 +1,272 @@
+@if (field(); as f) {
+  <header class="head">
+    <span class="glyph" aria-hidden="true">{{ meta()!.glyph }}</span>
+    <div>
+      <h2>{{ meta()!.label }}</h2>
+      <p class="muted small">{{ meta()!.hint }}</p>
+    </div>
+  </header>
+
+  @if (fieldIssues().length) {
+    <ul class="issue-list section" data-testid="field-issues">
+      @for (issue of fieldIssues(); track $index) {
+        <li>
+          <span [class]="issue.level === 'error' ? 'pill pill--error' : 'pill pill--warn'">{{ issue.level === 'error' ? 'Fix' : 'Check' }}</span>
+          <span>{{ issue.message }}</span>
+        </li>
+      }
+    </ul>
+  }
+
+  <section class="section">
+    <h3>Basics</h3>
+    <div class="stack">
+      <label>
+        <span class="label">Label</span>
+        <input class="control" [value]="f.label" (input)="setLabel($any($event.target).value)" data-testid="prop-label" />
+      </label>
+      <label>
+        <span class="label">Key</span>
+        <input
+          class="control key-input"
+          [value]="f.key"
+          (input)="set({ key: $any($event.target).value.trim() }, 'key')"
+          spellcheck="false"
+          data-testid="prop-key"
+        />
+        <span class="help">Name of this value in the submitted data. Follows the label until you edit it.</span>
+      </label>
+      @if (meta()!.capabilities.placeholder) {
+        <label>
+          <span class="label">Placeholder</span>
+          <input class="control" [value]="f.placeholder" (input)="set({ placeholder: $any($event.target).value }, 'placeholder')" />
+        </label>
+      }
+      <label>
+        <span class="label">Help text</span>
+        <input class="control" [value]="f.helpText" (input)="set({ helpText: $any($event.target).value }, 'help')" />
+      </label>
+
+      <fieldset class="segmented">
+        <legend class="label">Width</legend>
+        <label [class.on]="f.width === 'full'">
+          <input type="radio" name="width" [checked]="f.width === 'full'" (change)="set({ width: 'full' })" /> Full
+        </label>
+        <label [class.on]="f.width === 'half'">
+          <input type="radio" name="width" [checked]="f.width === 'half'" (change)="set({ width: 'half' })" /> Half
+        </label>
+      </fieldset>
+
+      <label>
+        <span class="label">Default value</span>
+        @switch (f.type) {
+          @case ('checkbox') {
+            <span class="check">
+              <input type="checkbox" [checked]="f.defaultValue === true" (change)="setDefault($any($event.target).checked)" />
+              <span>Checked by default</span>
+            </span>
+          }
+          @case ('select') {
+            <ng-container *ngTemplateOutlet="optionDefault" />
+          }
+          @case ('radio') {
+            <ng-container *ngTemplateOutlet="optionDefault" />
+          }
+          @case ('number') {
+            <input class="control" type="number" [value]="f.defaultValue ?? ''" (input)="setDefault($any($event.target).value)" />
+          }
+          @case ('date') {
+            <input class="control" type="date" [value]="f.defaultValue ?? ''" (input)="setDefault($any($event.target).value)" />
+          }
+          @default {
+            <input class="control" [value]="f.defaultValue ?? ''" (input)="setDefault($any($event.target).value)" />
+          }
+        }
+        <ng-template #optionDefault>
+          <select class="control" (change)="setDefault($any($event.target).value)">
+            <option value="" [selected]="!f.defaultValue">No default</option>
+            @for (o of f.options; track $index) {
+              <option [value]="o.value" [selected]="o.value === f.defaultValue">{{ o.label }}</option>
+            }
+          </select>
+        </ng-template>
+      </label>
+    </div>
+  </section>
+
+  @if (meta()!.capabilities.options) {
+    <section class="section">
+      <h3>Options</h3>
+      <div class="options">
+        <span class="label">Label</span>
+        <span class="label">Value</span>
+        <span></span>
+        @for (o of f.options; track $index; let i = $index) {
+          <input class="control" [value]="o.label" (input)="setOptionLabel(i, $any($event.target).value)" [attr.aria-label]="'Option ' + (i + 1) + ' label'" />
+          <input class="control key-input" [value]="o.value" (input)="setOptionValue(i, $any($event.target).value)" [attr.aria-label]="'Option ' + (i + 1) + ' value'" />
+          <button type="button" class="btn btn--quiet btn--sm btn--icon" (click)="removeOption(i)" [attr.aria-label]="'Remove option ' + (i + 1)">✕</button>
+        }
+      </div>
+      <button type="button" class="btn btn--sm add" (click)="addOption()">Add option</button>
+    </section>
+  }
+
+  <section class="section">
+    <h3>Validation</h3>
+    <div class="stack">
+      <label class="check">
+        <input
+          type="checkbox"
+          [checked]="f.validation.required"
+          (change)="setValidation({ required: $any($event.target).checked })"
+          data-testid="prop-required"
+        />
+        <span>{{ f.type === 'checkbox' ? 'Must be ticked to submit' : 'Required' }}</span>
+      </label>
+
+      @if (meta()!.capabilities.length) {
+        <div class="pair">
+          <label>
+            <span class="label">Min length</span>
+            <input class="control" type="number" min="0" [value]="f.validation.minLength ?? ''" (input)="setValidation({ minLength: num($any($event.target).value) }, 'minLength')" />
+          </label>
+          <label>
+            <span class="label">Max length</span>
+            <input class="control" type="number" min="0" [value]="f.validation.maxLength ?? ''" (input)="setValidation({ maxLength: num($any($event.target).value) }, 'maxLength')" />
+          </label>
+        </div>
+      }
+      @if (meta()!.capabilities.range) {
+        <div class="pair">
+          <label>
+            <span class="label">Minimum</span>
+            <input class="control" type="number" [value]="f.validation.min ?? ''" (input)="setValidation({ min: num($any($event.target).value) }, 'min')" />
+          </label>
+          <label>
+            <span class="label">Maximum</span>
+            <input class="control" type="number" [value]="f.validation.max ?? ''" (input)="setValidation({ max: num($any($event.target).value) }, 'max')" />
+          </label>
+        </div>
+      }
+      @if (meta()!.capabilities.pattern) {
+        <label>
+          <span class="label">Pattern (regular expression)</span>
+          <input
+            class="control key-input"
+            [value]="f.validation.pattern ?? ''"
+            (input)="setValidation({ pattern: $any($event.target).value || null }, 'pattern')"
+            placeholder="^[A-Z]{3}-\d{4}$"
+            spellcheck="false"
+          />
+        </label>
+        @if (f.validation.pattern) {
+          <label>
+            <span class="label">Message when it doesn't match</span>
+            <input
+              class="control"
+              [value]="f.validation.patternMessage ?? ''"
+              (input)="setValidation({ patternMessage: $any($event.target).value || null }, 'patternMessage')"
+            />
+          </label>
+        }
+      }
+    </div>
+  </section>
+
+  <section class="section">
+    <h3>Show this field</h3>
+    <div class="stack">
+      <label>
+        <span class="sr-only">Depends on</span>
+        <select class="control" (change)="setRuleSource($any($event.target).value)" data-testid="rule-source">
+          <option value="" [selected]="!f.visibleWhen">Always</option>
+          @for (c of ruleCandidates(); track c.id) {
+            <option [value]="c.id" [selected]="f.visibleWhen?.fieldId === c.id">Only when "{{ c.label || c.key }}"…</option>
+          }
+        </select>
+      </label>
+      @if (f.visibleWhen && ruleSource(); as source) {
+        <div class="pair">
+          <label>
+            <span class="sr-only">Condition</span>
+            <select class="control" (change)="setRuleOperator($any($event.target).value)" data-testid="rule-operator">
+              @for (op of ruleOperators(); track op) {
+                <option [value]="op" [selected]="f.visibleWhen.operator === op">{{ operatorLabels[op] }}</option>
+              }
+            </select>
+          </label>
+          @if (ruleNeedsValue()) {
+            <label>
+              <span class="sr-only">Value</span>
+              @if (source.options.length) {
+                <select class="control" (change)="setRuleValue($any($event.target).value)" data-testid="rule-value">
+                  @for (o of source.options; track $index) {
+                    <option [value]="o.value" [selected]="o.value === f.visibleWhen.value">{{ o.label }}</option>
+                  }
+                </select>
+              } @else {
+                <input class="control" [value]="f.visibleWhen.value" (input)="setRuleValue($any($event.target).value)" data-testid="rule-value" />
+              }
+            </label>
+          }
+        </div>
+      }
+      @if (!ruleCandidates().length) {
+        <p class="help">Rules can depend on fields above this one. Move it down to add a condition.</p>
+      }
+    </div>
+  </section>
+
+  <footer class="section row">
+    <button type="button" class="btn btn--sm" (click)="store.duplicateField(f.id)">Duplicate</button>
+    <button type="button" class="btn btn--sm btn--danger" (click)="store.removeField(f.id)">Delete field</button>
+  </footer>
+} @else {
+  <header class="head">
+    <div>
+      <h2>Form settings</h2>
+      <p class="muted small">Select a field on the canvas to edit it.</p>
+    </div>
+  </header>
+
+  <section class="section">
+    <div class="stack">
+      <label>
+        <span class="label">Title</span>
+        <input class="control" [value]="store.schema().title" (input)="store.updateSettings({ title: $any($event.target).value }, 'title')" />
+      </label>
+      <label>
+        <span class="label">Description</span>
+        <textarea
+          class="control"
+          [value]="store.schema().description"
+          (input)="store.updateSettings({ description: $any($event.target).value }, 'description')"
+        ></textarea>
+      </label>
+      <label>
+        <span class="label">Submit button text</span>
+        <input class="control" [value]="store.schema().submitLabel" (input)="store.updateSettings({ submitLabel: $any($event.target).value }, 'submit')" />
+      </label>
+    </div>
+  </section>
+
+  <section class="section">
+    <h3>Checks</h3>
+    @if (formIssues().length) {
+      <ul class="issue-list">
+        @for (issue of formIssues(); track $index) {
+          <li>
+            <span [class]="issue.level === 'error' ? 'pill pill--error' : 'pill pill--warn'">{{ issue.level === 'error' ? 'Fix' : 'Check' }}</span>
+            @if (issue.fieldId) {
+              <button type="button" class="link" (click)="store.select(issue.fieldId)">{{ issue.message }}</button>
+            } @else {
+              <span>{{ issue.message }}</span>
+            }
+          </li>
+        }
+      </ul>
+    } @else {
+      <p class="muted small">No problems found. This form is ready to preview and share.</p>
+    }
+  </section>
+}
